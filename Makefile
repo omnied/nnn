@@ -32,6 +32,7 @@ O_NOSORT := 0  # disable sorting entries on dir load
 
 # User patches
 O_COLEMAK := 0 # change key bindings to colemak compatible layout
+O_COLEMAK-DH := 0 # change key bindings to colemak-dh compatible layout
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
 O_RESTOREPREVIEW := 0 # add preview pipe to close and restore preview pane
@@ -50,7 +51,7 @@ endif
 
 ifeq ($(strip $(O_DEBUG)),1)
 	CPPFLAGS += -DDEBUG
-	CFLAGS += -g
+	CFLAGS += -g3
 endif
 
 ifeq ($(strip $(O_NORL)),1)
@@ -95,15 +96,18 @@ ifeq ($(strip $(O_CTX8)),1)
 endif
 
 ifeq ($(strip $(O_ICONS)),1)
-	CPPFLAGS += -DICONS
+	ICONS_INCLUDE = icons-generated-icons-in-term.h
+	CPPFLAGS += -DICONS_IN_TERM -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_NERD)),1)
-	CPPFLAGS += -DNERD
+	ICONS_INCLUDE = icons-generated-nerd.h
+	CPPFLAGS += -DNERD -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_EMOJI)),1)
-	CPPFLAGS += -DEMOJI
+	ICONS_INCLUDE = icons-generated-emoji.h
+	CPPFLAGS += -DEMOJI -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_QSORT)),1)
@@ -165,6 +169,7 @@ LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
 COLEMAK = patches/colemak
+COLEMAK-DH = patches/colemak-dh
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
 RESTOREPREVIEW = patches/restorepreview
@@ -187,17 +192,17 @@ endif
 ifeq ($(strip $(O_DEBUG)),1)
 	HEADERS += src/dbg.h
 endif
-ifeq ($(strip $(O_EMOJI)),1)
-	HEADERS += src/icons.h src/icons-emoji.h
-endif
-ifeq ($(strip $(O_NERD)),1)
-	HEADERS += src/icons.h src/icons-nerdfont.h
-endif
-ifeq ($(strip $(O_ICONS)),1)
-	HEADERS += src/icons.h src/icons-in-terminal.h
-endif
 ifeq ($(strip $(O_QSORT)),1)
 	HEADERS += src/qsort.h
+endif
+ifeq ($(strip $(O_EMOJI)),1)
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE)
+endif
+ifeq ($(strip $(O_NERD)),1)
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE)
+endif
+ifeq ($(strip $(O_ICONS)),1)
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE) src/icons-in-terminal.h
 endif
 
 all: $(BIN)
@@ -211,6 +216,10 @@ $(BIN): $(SRC) $(HEADERS) Makefile
 debug: $(BIN)
 norl: $(BIN)
 nolc: $(BIN)
+
+src/$(ICONS_INCLUDE): src/icons-hash.c src/icons.h src/icons-in-terminal.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+	./src/icons-hash-gen > $@
 
 install-desktop: $(DESKTOPFILE)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
@@ -302,7 +311,7 @@ upload-local: sign static musl
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 	# upload emoji compiled static binary
-	tar -zcf $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
+	tar -zcf $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-emoji-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz
@@ -313,7 +322,7 @@ upload-local: sign static musl
 	    --upload-file $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz src/icons-hash-gen src/icons-generated-*.h
 
 checkpatches:
 	./patches/check-patches.sh
@@ -333,6 +342,9 @@ endif
 ifeq ($(strip $(O_COLEMAK)),1)
 	patch --forward $(PATCH_OPTS) --strip=1 --input=$(COLEMAK)/mainline.diff
 endif
+ifeq ($(strip $(O_COLEMAK-DH)),1)
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(COLEMAK-DH)/mainline.diff
+endif
 
 postpatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
@@ -348,6 +360,9 @@ ifeq ($(strip $(O_RESTOREPREVIEW)),1)
 endif
 ifeq ($(strip $(O_COLEMAK)),1)
 	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(COLEMAK)/mainline.diff
+endif
+ifeq ($(strip $(O_COLEMAK-DH)),1)
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(COLEMAK-DH)/mainline.diff
 endif
 
 skip: ;

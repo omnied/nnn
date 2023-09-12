@@ -1,3 +1,98 @@
+nnn v4.9 Elixir
+2023-08-27
+
+- config option `NNN_ARCHMNT` to specify archive mounter utility
+- key <kbd>^y</kbd> to jump to next young file
+- filter adjustment when opening context from plugin
+- properly update mode after `chmod`
+- pre-fill selected file name to create link if sel is preferred over hovered
+- fix crash when `PWD` is empty
+- make `quitcd.bash_zsh` POSIX-compliant
+- `nmount` - support `udiskctl` as default
+- `preview-tui` - support wezterm split size percentage
+- `preview-tui` - move to bash for environment manipulation through arrays
+- `fzopen` - handle empty selection
+- `finder` - use default path to find
+- add icons for `djvu` files
+- support Nerd Fonts v3.0.0 and above (older versions are broken by v3.0.0)
+
+-------------------------------------------------------------------------------
+
+nnn v4.8 Spritz
+2023-04-13
+
+- show total size (key <kbd>S</kbd>) of non-filtered selection in a directory
+- fix tilde (~) handling in file name
+- plugin `.nmv` now respects `-u` flag
+- env var `$NNN_PREFER_SELECTION` exported to all plugins
+- support for wezterm in `preview-tui`
+- create new file or directory (tree) on startup
+- run command as plugin now supports exported variables
+- use `"$nnn"` anywhere when running command as plugin
+- set defaults for some prompts on <kbd>Enter</kbd>
+- improve archive, rename and create new workflows
+- optimize link creation
+- allow overwriting regular files on new empty file creation
+- add patch for colemak keyboard (existing renamed to colemak-dh)
+- add correct check for Wayland in clipboard plugins
+- add quitcd script for nushell
+- plugin `kdeconnect` - send multiple files
+- plugin `preview-tui`: add `chafa` as preferred image viewer, multiple fixes
+- plugin `nmount` - misc. improvements
+- add icon for jxl files
+
+-------------------------------------------------------------------------------
+
+nnn v4.7 Cuba libre
+2022-11-24
+
+
+- fix <kbd>^N</kbd> not working sometimes (#1449)
+- fix file remove confirmation prompt
+- bring back `atool` as the default archive handler
+- add option `-B` to use `bsdtar` as the archive utility
+- find and list mode improvements
+  ntinue even if max paths/data size limit is exceeded
+  eed improvements
+  pport listing maximum 16K paths of 64 MiB of data
+- key <kbd>J</kbd> to jump to an entry or relative offset from current entry
+- prefill the hard link creation prompt when there's a single target (#1507)
+- documented workaround for docker container crash (#1407, #1476)
+- plugin `imgview`: handle arguments as strings (#1509)
+- plugin `wallpaper`: support Wayland (#1512)
+- plugin `upload`: handle selection using `ffsend` (#1523)
+- add Rust icons (#1502)
+
+-------------------------------------------------------------------------------
+
+nnn v4.6 Absinthe
+2022-07-26
+
+- icon handling overhaul (#1432, #1436)
+  - better performance, memory usage and reduced binary size
+- emoji support for supporting distros and terminals (#1346)
+- open the target directory of symlinked bookmarks (#1353)
+- enable show hidden when a hidden file is passed as argument
+- add Colemak-DH layout keybinds to patch framework (#1421)
+- set `bsdtar` as the default archive utility
+- support 4 byte unicode keybinds (#1428)
+- enable directory auto-enter during filter operation (`-A` to disable)
+- enable filter prompt inside the bookmark/plugin dirs
+- show volume usage information in help
+- add new icon colors for mp4 and flac files
+- use `stat -x` for file details on *BSD and macOS (#1389)
+- interpret suffix `$nnn` when paging (#1355)
+- disable key <kbd>e</kbd> (edit file) in explorer mode (#1394)
+- fix double order chars on filter case match change
+- `.cbcp`: more verbose message on paste without a selection
+- plugin `preview-tui`: scale-up kitty previews
+- plugin `preview-tui`: account for ueberzug offset
+- plugin `preview-tui`: support `SPLIT_SIZE` for preview pane (#1431)
+- plugin `autojump`: support z.lua
+- new Makefile target `shellcheck` to verify plugins
+
+-------------------------------------------------------------------------------
+
 nnn v4.5 Cachaça
 2022-04-26
 
@@ -67,7 +162,7 @@ nnn v4.3 Martini
 - add `bookmarks` directory for flexible symlinked bookmarks
 - new key <kbd>B</kbd> to add a symlinked bookmark for current dir
 - special variables `$dN`, `$fN` available for plugins/prompt/shell to access
-  dir/hovered file in each conext
+  dir/hovered file in each context
 - config `NNN_ORDER` to set directory-specific ordering
 - show/hide hidden files as per context state in plugin based batch rename
 - retain search filter history for plugin `finder`
